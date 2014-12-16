@@ -1,0 +1,35 @@
+erreur catalog
+"2014-12-15 23:11:36   bacula-dir JobId 3444: shell command: run BeforeJob "/etc/bacula/scripts/make_catalog_backup.pl bacula-catalog"
+2014-12-15 23:11:36   bacula-dir JobId 3444: BeforeJob: Can't find your catalog (bacula-catalog) in director configuration
+2014-12-15 23:11:36 bacula-dir JobId 3444: Error: Runscript: BeforeJob returned non-zero status=1. ERR=Child exited with code 1 "
+
+cette erreur est une erreur de droit.
+l'utilisateur bacula n'a pas les bons droits sur les fichiers
+///// serie de test/////
+which dbcheck
+su -m bacula -c '/usr/sbin/dbcheck -B -c /etc/bacula/bacula-dir.conf
+cette commande aide a trouver le fichier qu'il faut donner les bons droits.
+<!-- su -m bacula -c '/usr/sbin/dbcheck -B -c /etc/bacula/bacula-dir.conf'
+catalog=MyCatalog
+db_name=bacula
+db_driver=
+db_user=bacula
+db_password=
+db_address=
+db_port=0
+db_socket=
+db_type=PostgreSQL
+working_dir=/var/db/bacula -->
+
+su -m bacula -c '/usr/local/share/bacula/make_catalog_backup.pl MyCatalog'
+cette commande doit permetre de creer le fichier mysql bacula.sql
+
+ceque j'ai faire
+ su -m bacula -c '/usr/sbin/dbcheck -B -c /etc/bacula/bacula-dir.conf
+  510  2014/12/16 08:45:06 chown root:bacula pools.conf
+  513  2014/12/16 08:45:41 chown root:bacula schedules.conf 
+  519  2014/12/16 08:48:29 chown root:bacula clients/
+  529  2014/12/16 09:00:30 history | grep chown
+  542  2014/12/16 09:32:24 chown root:bacula /var/lib/bacula/bacula.sql 
+  545  2014/12/16 09:33:19 chown bacula:bacula /var/lib/bacula/bacula.sql 
+  su -m bacula -c '/usr/local/share/bacula/make_catalog_backup.pl MyCatalog'
