@@ -33,3 +33,4 @@ ceque j'ai faire
   542  2014/12/16 09:32:24 chown root:bacula /var/lib/bacula/bacula.sql 
   545  2014/12/16 09:33:19 chown bacula:bacula /var/lib/bacula/bacula.sql 
   su -m bacula -c '/usr/local/share/bacula/make_catalog_backup.pl MyCatalog'
+https://dan.langille.org/2010/03/23/baccula-errors-with-500-backup-catalog/
