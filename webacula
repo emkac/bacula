@@ -1,0 +1,88 @@
+installation webacula 5.5.1
+installation apache2 php5 avec prerequis
+apt-get install -y apache2 mysql-server php5 php5-mysql build-essential libmysqlclient-dev libssl-dev libbz2-dev \
+libpcre3-dev libdbi-perl libarchive-zip-perl libdate-manip-perl libdevice-serialport-perl libmime-perl  \
+libpcre3 libwww-perl libdbd-mysql-perl libsys-mmap-perl yasm subversion \
+automake autoconf libjpeg8-dev libjpeg8 apache2-mpm-prefork libapache2-mod-php5 php5-cli \
+libphp-serialization-perl libgnutls-dev libjpeg8-dev libavcodec-dev libavformat-dev libswscale-dev \
+ libavutil-dev libv4l-dev libtool ffmpeg libnetpbm10-dev libavdevice-dev libmime-lite-perl \
+dh-autoreconf dpatch unzip libjson-any-perl netpbm zip libnet-sftp-foreign-perl \
+1- telechargement
+http://sourceforge.net/projects/webacula/files/webacula/5.5.1/
+2 decompression puis deposer  dans /usr/share/ avec le nom webacula
+tar xzf bacula-5.5.1.tar ; mv bacula-5.5.1 /usr/share/bacula
+3 aller dans le dossier bacula pour verifier les dependances
+cd /usr/share/bacula/
+cd install/
+php check_system_requirements.php  >>>> 
+********************************
+Current MySQL version = 5.5.43	OK
+Current PHP version = 5.4.41-0+deb7u1	OK
+php pdo installed.	OK      
+php gd installed.	OK  apt-get install php5-gd
+php xml installed.	OK
+php dom installed.	OK
+php pdo_mysql installed.	OK  >> installer  php5-mysqlnd
+php-dom, php-xml installed.	OK
+**********************************
+aller dans /usr/share/webacula/library pour faire un lien symbolique du dossier /usr/share/php/Zend dans ce dossier
+si le dossier /usr/share/php/Zend n'existe pas alors installer le framework zendframework
+apt-get install zendframework 
+
+cd /usr/share/webacula/library
+ln -s /usr/share/php/Zend/ .
+cd ../install/
+editer le fichier db.conf
+**********************************
+# See also application/config.ini
+
+# bacula settings
+db_name="bacula"  ## nom de la base de donné creer lors de l'installation de bacula
+# for Sqlite only
+#db_name_sqlite="/var/bacula/working/bacula.db"
+db_user="bacula"  ## users abilité a travailler sur la base bacula
+
+# CHANGE_THIS
+db_pwd="bacula"   ## le mot de passe associer
+
+# Webacula web interface settings
+#
+# Built-in superuser login is 'root'   ## login par defaut lors de la connexion a l'interface web
+#
+# CHANGE_THIS
+webacula_root_pwd="bacula"   ## mot de passe associé
+********************************************************
+aller dans /usr/share/webacula/install/MySql
+executer les deux scripts qui se charge de creer et peupler les tables pour webacula.
+./10_make_tables.sh  
+./20_acl_make_tables.sh
+
+ensuite depuis ce meme dossier lancer les commandes suivantes
+usermod -aG bacula www.data
+which bconsole
+chown root:bacula /usr/sbin/bconsole
+chown root:bacula /etc/bacula/bconsole
+
+editer le fichier de configuration /usr/share/webacula/application/config.ini
+le fichier est dans le dossier joint au tuto
+copier le fichier de configuration webacula depuis le dossier apache vers /etc/apache2/conf.d
+cp /usr/share/webacula/install/apache/web/webacula.conf  /etc/apache2/conf.d/
+vi /etc/apache2/conf.d/webacula.conf
+dans la section <Directory /usr/share/webacula/html/test_mod_rewrite>
+commenter avec # la ligne Deny from all
+ #Deny from all
+
+activer le module  mod_rewrite de apache 
+depuis /etc/apache2/
+a2enmod rewrite
+/etc/apache2/conf.d/webacula.conf:18: </Directory>
+
+ajouter le fichier webacula dans /etc/apache2/site-available/
+a2ensite webacula
+vi /usr/share/webacula/html/index.php
+faire une recherche avec le nombre 12 
+changer le 12 par 14
+
+creer le dossier
+/usr/share/webacula/data/cache
+chmod 777 -R /usr/share/webacula/data/cache
