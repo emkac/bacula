@@ -1,0 +1,44 @@
+ http://webmodelling.com/webbits/miscellaneous/bacula.aspx pour la relation entre les fichiers 
+ 
+ apt-get install mysql-server
+ vi /etc/mysql/my.cf 
+ bind-address            = 0.0.0.0
+service mysql restart
+netstal -lntp
+tcp        0      0 0.0.0.0:3306            0.0.0.0:*               LISTEN      19147/mysqld
+
+apt-get install bacula bacula-common-mysql bacula-director-mysql bacula-sd-mysql
+les fichiers par defauts sont:
+bacula-dir.conf  bacula-fd.conf  bacula-sd.conf  bconsole.conf	common_default_passwords  scripts  tray-monitor.conf
+mkdir old; mv *.conf old
+vi bacula-dir.conf bacula-fd.conf bacula-sd.conf bconsole.conf
+mkdir /srv/bacula-volumes/
+
+verification des fichiers de configurations
+bacula-dir -t bacula-dir.conf
+bacula-sd -t bacula-sd.conf
+bacula-fd -t bacula-fd.conf
+bconsole -t
+corriger les erreurs s'il y'a lieu
+creation des fichiers complementaire pour alleger le fichier bacula-dir.conf
+vi jobdefs.conf
+vi pools.conf
+vi schedules.conf
+mkdir clients  le dossier clients contient les fichiers de config par client.
+vi bacula.conf     # un fichier de configuration client apelé pour la circonstance bacula.conf
+
+demarer les services
+service bacula-director start
+service bacula-sd start
+bacula-fd start
+
+bconsole 
+s'il existe des erreurs alors il faut regarder es ce que le serveur ecoule sur le port 9101 sur l'ip et non en 127.0.0.1
+
+
+
+
+
+
+
+
