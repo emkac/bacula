@@ -1,0 +1,169 @@
+Director {                            # define myself
+  Name = bacula-dir
+  DirAddress = x.x.x.x
+  DIRport = 9101                # where we listen for UA connections
+  Messages = Daemon
+  QueryFile = "/etc/bacula/scripts/query.sql"
+  WorkingDirectory = "/var/lib/bacula"
+  PidDirectory = "/var/run/bacula"
+  Maximum Concurrent Jobs = 10 # just in case there are some restores that need to take from many pools at the same time
+  Password = "Cv70F6pf1t6pBopT4vQOnigDrR0v3L"         # Console password
+  Statistics Retention = 1 year # seems reasonable
+}
+
+# Job defaults for new jobs
+#
+JobDefs {
+  Name = "DefaultJob"
+  Type = Backup
+  Level = Differential
+  FileSet = "Unix Configuration Set"
+  Schedule = "WeeklyCycle"
+  Messages = Standard
+  Pool = DailyFilePool
+  Storage = FileStorage
+  Priority = 10
+  Write Bootstrap = "/var/lib/bacula/bootstraps/%c.bsr"
+  Spool Data = yes # required for spooling
+  #Spool Attributes = yes # already set
+}
+
+#
+# Job to backup the catalog database (after the nightly save)
+#
+Job {
+  Name = "BackupConfiguration"
+  JobDefs = "DefaultJob"
+  Level = Full
+  Client = bacula-fd 
+  FileSet="Bacula Configuration"
+  Schedule = "WeeklyCycleAfterBackup"
+  Write Bootstrap = "/var/lib/bacula/bootstraps/%n.bsr"
+  Priority = 11                   # run after other backups
+}
+
+#
+# Job to backup the catalog database (after the nightly save)
+#
+Job {
+  Name = "BackupCatalog"
+  JobDefs = "DefaultJob"
+  Level = Full
+  Client = bacula-fd 
+  FileSet="Catalog"
+  Schedule = "WeeklyCycleAfterBackup"
+  RunBeforeJob = "/etc/bacula/scripts/make_catalog_backup.pl bacula-catalog"
+  RunAfterJob  = "/etc/bacula/scripts/delete_catalog_backup"
+  # Write Bootstrap = "/var/lib/bacula/bootstraps/%n.bsr" # will be sent by email, check next line
+  Write Bootstrap = "|mail -a 'From: Bacula Orange CI <no-reply@aviso.ci>' -s 'Bacula : Daily Catalog Bootstrap' orange-ci-projet@smile.fr"
+  Priority = 12                   # run after other backups
+}
+
+#
+# Standard Restore template, to be changed by Console program
+#  Only one such job is needed for all Jobs/Clients/Storage ...
+#
+Job {
+  Name = "RestoreFiles"
+  Type = Restore
+  Client = bacula-fd
+  FileSet="Unix Configuration Set"
+  Pool = DailyFilePool
+  Messages = Standard
+  Storage = FileStorage
+  Where = /var/lib/bacula/bacula-restores
+}
+
+#
+# Configuration Set : backups everything under /etc
+#
+FileSet {
+  Name = "Unix Configuration Set"
+  Include {
+    Options {
+      signature = MD5
+      compression = GZIP
+    }
+  
+    File = /etc
+  }
+}
+
+#
+# Bacula Configuration FileSet : only the dump of the catalog
+#
+FileSet {
+  Name = "Bacula Configuration"
+  Include {
+    Options {
+      signature = MD5
+      compression = GZIP
+    }
+    File = "/etc/bacula"
+  }
+}
+
+#
+# Catalog FileSet : only the dump of the catalog
+#
+FileSet {
+  Name = "Catalog"
+  Include {
+    Options {
+      signature = MD5
+      compression = GZIP
+    }
+    File = "/var/lib/bacula/bacula.sql"
+  }
+}
+
+
+#
+# Definition of weekly file storage device
+#
+Storage {
+  Name = FileStorage
+  Address = x.x.x.x
+  SDPort = 9103
+  Password = "ODwI1Vl7LC-VojGJa6UxjyDtzVjrZHkXg" 
+  Device = FileStorage
+  Media Type = File
+  Maximum Concurrent Jobs = 10
+  #Allow Compression = yes #default
+}
+
+#
+# Generic catalog service
+#
+Catalog {
+  Name = bacula-catalog
+  dbname = bacula; DB Address = "localhost"; dbuser = "bacula"; dbpassword = "xxxxxx"
+}
+
+#
+# Reasonable message delivery -- send most everything to email address
+# and to the console
+#
+Messages {
+  Name = Standard
+  console = all, !skipped, !saved
+  syslog = all, !skipped
+  catalog = all, !skipped, !saved
+}
+
+#
+# Message delivery for daemon messages (no job).
+#
+Messages {
+  Name = Daemon
+  console = all, !skipped, !saved
+  syslog = all, !skipped
+}
+
+#
+# Necessary for splitting configurations in multiple files
+#
+@/etc/bacula/jobdefs.conf
+@/etc/bacula/pools.conf
+@/etc/bacula/schedules.conf
+@|"sh -c 'for f in /etc/bacula/clients/*.conf ; do echo @${f} ; done'"
