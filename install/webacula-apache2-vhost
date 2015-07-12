@@ -1,0 +1,83 @@
+<VirtualHost 192.168.3.101:80>
+DocumentRoot /var/www/webacula/
+Alias /webacula  /var/www/webacula/html
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/webacula
+RewriteRule ^(.*)$ /webacula/$1
+
+  <Directory /var/www/webacula/html>
+    RewriteEngine On
+    RewriteBase   /webacula
+    RewriteCond %{REQUEST_FILENAME} -s [OR]
+    RewriteCond %{REQUEST_FILENAME} -l [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^.*$ - [NC,L]
+    RewriteRule ^.*$ index.php [NC,L]
+    php_flag magic_quotes_gpc off
+    php_flag register_globals off
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Order deny,allow
+    Deny from all
+    Allow from 127.0.0.1
+    Allow from localhost
+    Allow from ::1
+    Allow from 192.168.2.0/23
+  </Directory>
+
+
+  <Directory /var/www/webacula/docs>
+    Order deny,allow
+    Deny from all
+  </Directory>
+  
+  <Directory /var/www/webacula/application>
+    Order deny,allow
+    Deny from all
+  </Directory>
+  
+  <Directory /var/www/webacula/languages>
+    Order deny,allow
+    Deny from all
+  </Directory>
+  
+  <Directory /var/www/webacula/library>
+    Order deny,allow
+    Deny from all
+  </Directory>
+  
+  <Directory /var/www/webacula/install>
+    Order deny,allow
+    Deny from all
+  </Directory>
+  
+  <Directory /var/www/webacula/tests>
+    Order deny,allow
+    Deny from all
+  </Directory>
+  
+  <Directory /var/www/webacula/data>
+    Order deny,allow
+    Deny from all
+  </Directory>
+
+#
+# test mod_rewrite
+#
+#  <Directory /var/www/webacula/html/test_mod_rewrite>
+#    RewriteEngine On
+#    # for test mod_rewrite
+#    RewriteBase   /webacula/test_mod_rewrite
+#    RewriteRule ^testlink([^/]*).html$  index.php?testlink=$1 [L]
+#    php_flag magic_quotes_gpc off
+#    php_flag register_globals off
+#    Options Indexes FollowSymLinks
+#    AllowOverride All
+#    Order deny,allow
+#    Deny from all
+#    Allow from 127.0.0.1
+#    Allow from localhost
+#    Allow from ::1
+#    Allow from 192.168.3.0/24
+#  </Directory>
+</VirtualHost>
