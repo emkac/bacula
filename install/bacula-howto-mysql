@@ -30,7 +30,7 @@ vi bacula.conf     # un fichier de configuration client apelé pour la circonsta
 demarer les services
 service bacula-director start
 service bacula-sd start
-bacula-fd start
+service bacula-fd start
 
 bconsole 
 s'il existe des erreurs alors il faut regarder es ce que le serveur ecoule sur le port 9101 sur l'ip et non en 127.0.0.1
