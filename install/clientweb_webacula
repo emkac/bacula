@@ -65,7 +65,7 @@ chown www.data -R /var/www
 usermod -aG bacula www.data
 which bconsole
 chown root:bacula /usr/sbin/bconsole
-chown root:bacula /etc/bacula/bconsole
+chown root:bacula /etc/bacula/bconsole.conf
 
 editer le fichier de configuration /usr/share/webacula/application/config.ini
 le fichier est dans le dossier joint au tuto
