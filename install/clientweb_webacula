@@ -59,6 +59,10 @@ executer les deux scripts qui se charge de creer et peupler les tables pour weba
 
 ensuite depuis ce meme dossier lancer les commandes suivantes
 usermod -aG bacula www.data
+s'il a une erreur comme " user www.data not exist " alors c'est que www.data n'est pas encore le ownner de /var/www.
+ls -l /var/www/
+chown www.data -R /var/www
+usermod -aG bacula www.data
 which bconsole
 chown root:bacula /usr/sbin/bconsole
 chown root:bacula /etc/bacula/bconsole
