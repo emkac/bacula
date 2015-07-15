@@ -1,0 +1,2 @@
+ mysql> use bacula;
+ delete from Job WHERE JobId not in ( SELECT DISTINCT JobId from File ) AND JobStatus in ('A','R','E','f','C','e');
